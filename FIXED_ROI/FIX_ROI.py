@@ -219,18 +219,46 @@ class MainDialog(QDialog):
         if int(CLOTH_num) == 0:
             print("do not save cloth number 0")
             return
-        
-        xlfile = load_workbook('./test.xlsx',data_only=True)
-        
-        if MODEL_num not in xlfile.sheetnames:
-            write_sheet = xlfile.create_sheet(MODEL_num)
-        else:
-            write_sheet = xlfile[MODEL_num]
+        xlfile = load_workbook('./test.xlsx', data_only=True)
 
-        ROI_val = str(x) +','+ str(y) + ','+ str(w) + ','+ str(h)
-        write_sheet.cell(int(CAM_num),(int(POSE_num)+6) ,ROI_val)
-        xlfile.save('./test.xlsx')
-        
+        if int(POSE_num) == 1:
+            if MODEL_num not in xlfile.sheetnames:
+                write_sheet = xlfile.create_sheet(MODEL_num)
+            else:
+                write_sheet = xlfile[MODEL_num]
+
+            ROI_val = str(x) +','+ str(y) + ','+ str(w) + ','+ str(h)
+            write_sheet.cell(int(CAM_num),(int(CLOTH_num)) ,ROI_val)
+            xlfile.save('./test.xlsx')
+        else:
+            load_roi = self.load_roi_value()
+            write_sheet = xlfile['Sheet']
+            diff_x = load_roi[0] - x
+            diff_y = load_roi[1] - y
+            diff_w = load_roi[2] - w
+            diff_h = load_roi[3] - h
+            diff_val = str(diff_x) +','+ str(diff_y) + ','+ str(diff_w) + ','+ str(diff_h)
+            write_sheet.cell(int(CAM_num), int(POSE_num), diff_val)
+            xlfile.save('./test.xlsx')
+
+
+    def load_diff_value(self):
+        POSE_num,CLOTH_num,MODEL_num,CAM_num= self.filename.split('_')
+        if int(CLOTH_num) == 0:
+            print("can't load cloth number 0")
+            return 0
+
+        CAM_num = CAM_num[0:2]
+        xlfile = load_workbook('./test.xlsx',data_only=True)
+        load_diff_sheet = xlfile['Sheet']
+        load_diff = load_diff_sheet.cell(int(CAM_num), int(POSE_num)).value
+        if load_diff is None:
+            return None
+        diff = str(load_diff).split(',')
+        diff = [int(value) for value in diff]
+        return diff
+
+
     def load_roi_value(self):
         POSE_num,CLOTH_num,MODEL_num,CAM_num= self.filename.split('_')
         if int(CLOTH_num) == 0:
@@ -245,16 +273,22 @@ class MainDialog(QDialog):
             return None
 
         load_sheet = xlfile[MODEL_num]
+
         load_roi = load_sheet.cell(int(CAM_num),int(CLOTH_num)).value
+
         if load_roi is None:
             return None
 
         roi = str(load_roi).split(',')
         ## str to int
         roi = [int(value) for value in roi]
-        ROI = [x+y for x,y in zip(roi, pose_diff[int(POSE_num)-1])]
-        print(roi , ROI)
-        return ROI
+        diff = self.load_diff_value()
+        if diff is not None:
+            ROI = [x-y for x,y in zip(roi, diff)]
+        #print(roi , ROI)
+            return ROI
+        else:
+            return roi
 
 # LOAD
     def load_to_frame(self):
