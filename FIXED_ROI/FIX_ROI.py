@@ -17,7 +17,7 @@ from openpyxl.reader.excel import load_workbook
 
 calUI = './FIXED_ROI.ui'
 buttonPush_count = 0
-
+pose_diff =[ [0,0,0,0], [20,2,2,-12], [35,2,-8,-14], [23,2,-104,-22], [91,11,12,-9], [143,-19,9,-9] ]
 
 cam_sub_points_by_top = {
     1:[0,0,0,0],
@@ -228,7 +228,7 @@ class MainDialog(QDialog):
             write_sheet = xlfile[MODEL_num]
 
         ROI_val = str(x) +','+ str(y) + ','+ str(w) + ','+ str(h)
-        write_sheet.cell(int(CAM_num),int(CLOTH_num),ROI_val)
+        write_sheet.cell(int(CAM_num),(int(POSE_num)+6) ,ROI_val)
         xlfile.save('./test.xlsx')
         
     def load_roi_value(self):
@@ -249,9 +249,11 @@ class MainDialog(QDialog):
         if load_roi is None:
             return None
 
-        ROI = str(load_roi).split(',')
+        roi = str(load_roi).split(',')
         ## str to int
-        ROI = [int(value) for value in ROI]
+        roi = [int(value) for value in roi]
+        ROI = [x+y for x,y in zip(roi, pose_diff[int(POSE_num)-1])]
+        print(roi , ROI)
         return ROI
 
 # LOAD
@@ -299,9 +301,10 @@ class MainDialog(QDialog):
         elif ROI == 0:
             return
         if (i % 32) < 12 or (i % 32) > 23:
-            ksize=100
+            #ksize=100
             roi = self.image[ROI[1]:ROI[1] + ROI[3], ROI[0]:ROI[0] + ROI[2]]
-            roi = cv2.blur(roi, (ksize, ksize)) 
+            #roi = cv2.blur(roi, (ksize, ksize))
+            roi = anonymize_face_pixelate(roi, blocks=8)
             self.image[ROI[1]:ROI[1] + ROI[3], ROI[0]:ROI[0] + ROI[2]] = roi 
             
             ROI.clear()
