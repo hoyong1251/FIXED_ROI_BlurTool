@@ -56,7 +56,7 @@ class MainDialog(QDialog):
         self.listWidget.keyPressEvent = self.listWidget_keyPressEvent
         #self.SAVE.clicked.connect(lambda: self.image_save())
         #self.BLUR.clicked.connect(lambda: self.test_blurring())  
-        self.LOAD.clicked.connect(lambda: self.load_to_frame())
+        #self.LOAD.clicked.connect(lambda: self.load_to_frame())
         self.AUTO.clicked.connect(lambda: self.auto_progress())
 
 # OPEN
@@ -228,7 +228,7 @@ class MainDialog(QDialog):
             write_sheet = xlfile[MODEL_num]
 
         ROI_val = str(x) +','+ str(y) + ','+ str(w) + ','+ str(h)
-        write_sheet.cell(int(CAM_num),int(CLOTH_num),ROI_val)
+        write_sheet.cell(int(CAM_num),int(POSE_num),ROI_val)
         xlfile.save('./test.xlsx')
         
     def load_roi_value(self):
