@@ -228,7 +228,7 @@ class MainDialog(QDialog):
             write_sheet = xlfile[MODEL_num]
 
         ROI_val = str(x) +','+ str(y) + ','+ str(w) + ','+ str(h)
-        write_sheet.cell(int(CAM_num),int(POSE_num),ROI_val)
+        write_sheet.cell(int(CAM_num),int(CLOTH_num),ROI_val)
         xlfile.save('./test.xlsx')
         
     def load_roi_value(self):
